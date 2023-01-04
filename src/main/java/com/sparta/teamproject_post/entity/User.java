@@ -1,11 +1,10 @@
 package com.sparta.teamproject_post.entity;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.id.IdentifierGenerationException;
 
 import javax.persistence.*;
 import java.math.BigInteger;
-import java.sql.SQLIntegrityConstraintViolationException;
 
 @Entity(name="USERS")
 @NoArgsConstructor
@@ -29,3 +28,5 @@ public class User{
         this.role = role;
     }
 }
+
+
