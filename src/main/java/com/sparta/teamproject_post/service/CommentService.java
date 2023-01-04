@@ -21,8 +21,14 @@ public class CommentService {
     // 댓글 작성
     public CommentResponseDto createComment(Long id, CommentRequestdto requestdto, Claims claims) {
         // 먼저 Long id를 이용해서 id가 있는지 확인합니다.
+        // Post post = postRepository.findById(id).orElseThrow(
+        // () -> new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
+        // );
 
-        // 그다음 post가 있는지 확인합니다.
+        // 그다음 토큰이 유효한지 확인합니다.
+        // User user = userRepository.getUsername(claims.getSubject()).orThrowElse(
+        // () ->  new IllegalArgumentException("타인의 댓글에 작성 할 수 없습니다.")
+        // );
 
 
         // 둘 다 있으면 comment에 값을 담아주고 Repository에 save 함수를 이용해서 comment 를 넣어줍니다.
@@ -38,9 +44,10 @@ public class CommentService {
         Comment comment = commentRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("id가 올바르지 않습니다.")
         );
-
         // user가 맞는지 확인합니다. claims 사용
-
+        // User user = userRepository.getUsername(claims.getSubject()).orElseThrow(
+        // () -> new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
+        // );
 
         comment.update(requestdto);
         return new CommentResponseDto(comment);
@@ -53,6 +60,9 @@ public class CommentService {
         );
 
         // user가 맞는지 확인합니다. claims 사용
+        // User user = userRepository.getUsername(claims.getSubject()).orElseThrow(
+        // () -> new  new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
+        // );
 
        commentRepository.deleteById(id);
     }
