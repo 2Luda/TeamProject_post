@@ -4,29 +4,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.math.BigInteger;
+
 
 @Entity(name="USERS")
 @NoArgsConstructor
 @Getter
-public class User{
+public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private BigInteger user_id;
-    @Column(nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // nullable: null 허용 여부
+    // unique: 중복 허용 여부 (false 일때 중복 허용)
+    @Column(nullable = false, unique = true)
     private String username;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
-    public User(String username, String password, UserRoleEnum role){
+    public User(String username, String password, UserRoleEnum role) {
         this.username = username;
         this.password = password;
         this.role = role;
     }
+
 }
 
 
