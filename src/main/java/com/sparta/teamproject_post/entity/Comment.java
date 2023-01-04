@@ -25,9 +25,9 @@ public class Comment extends TimeStamped{
     @JoinColumn(name = "postId")
     private Post post;
 
-    public Comment(String comment, String username, Post post) {
-        this.comment = comment;
-        this.username = username;
+    public Comment(User user, CommentRequestdto requestdto, Post post) {
+        this.comment = requestdto.getComment();
+        this.username = user.getUsername();
         this.post = post;
     }
 
