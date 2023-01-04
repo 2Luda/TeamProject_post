@@ -46,6 +46,7 @@ public class CommentService {
         return new CommentResponseDto(comment);
     }
 
+    // 댓글 삭제 기능
     public void deleteComment(Long id, Claims claims) {
         Comment comment = commentRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("id가 올바르지 않습니다.")
