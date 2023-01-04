@@ -1,9 +1,10 @@
 package com.sparta.teamproject_post.entity;
 
 import com.sparta.teamproject_post.dto.CommentRequestdto;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
