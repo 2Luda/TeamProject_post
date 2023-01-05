@@ -26,22 +26,22 @@ public class PostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
+    // 게시글 작성
+    public StatusResponseDto createPost(CreatePostRequestDto createPostRequestDto, User user) {
 
-    public StatusResponseDto createPost(CreatePostRequestDto createPostRequestDto, Claims claims) {
-
-        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
         if (!optionalUser.isPresent()){
             return new StatusResponseDto("사용자가 존재하지 않습니다.", 400);
         }
-        User user = optionalUser.get();
         Post post = new Post(createPostRequestDto.getTitle(), user.getUsername(), createPostRequestDto.getPostContent());
         postRepository.save(post);
         return new StatusResponseDto("게시글이 작성 되었습니다.", 200);
     }
 
-    public StatusResponseDto updatePost(Long postId, UpdatePostRequestDto updatePostRequestDto, Claims claims) {
+    // 게시글 수정
+    public StatusResponseDto updatePost(Long postId, UpdatePostRequestDto updatePostRequestDto, User user) {
 
-        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
         if (!optionalUser.isPresent()){
             return new StatusResponseDto("사용자가 존재하지 않습니다.", 400);
         }
@@ -50,11 +50,9 @@ public class PostService {
             return new StatusResponseDto("게시글이 존재하지 않습니다.", 400);
             //예외처리
         }
-        User user = optionalUser.get();
         Post post = optionalPost.get();
 
-        if (user.getUsername().equals(post.getUserName())) {
-
+        if (user.getUsername().equals(post.getUserName()) || user.getRole().equals(UserRoleEnum.ADMIN)) {
             post.update(updatePostRequestDto.getTitle(), updatePostRequestDto.getPostContent());
             postRepository.save(post);
             return new StatusResponseDto("게시글이 수정 되었습니다.", 200);
@@ -63,8 +61,9 @@ public class PostService {
         }
     }
 
-    public StatusResponseDto deletePost(Long postId, Claims claims) {
-        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+    // 게시글 삭제
+    public StatusResponseDto deletePost(Long postId, User user) {
+        Optional<User> optionalUser = userRepository.findByUsername(user.getUsername());
         if (!optionalUser.isPresent()){
             return new StatusResponseDto("사용자가 존재하지 않습니다.", 400);
         }
@@ -72,7 +71,6 @@ public class PostService {
         if (!optionalPost.isPresent()) {
             return new StatusResponseDto("게시글이 존재하지 않습니다.", 400);
         }
-        User user = optionalUser.get();
         Post post = optionalPost.get();
 
         if (user.getUsername().equals(post.getUserName()) || user.getRole().equals(UserRoleEnum.ADMIN)) {

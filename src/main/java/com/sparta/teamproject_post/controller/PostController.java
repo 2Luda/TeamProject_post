@@ -6,9 +6,11 @@ import com.sparta.teamproject_post.dto.StatusResponseDto;
 import com.sparta.teamproject_post.dto.UpdatePostRequestDto;
 import com.sparta.teamproject_post.jwt.Jwtutil;
 import com.sparta.teamproject_post.repository.PostRepository;
+import com.sparta.teamproject_post.security.UserDetailsImpl;
 import com.sparta.teamproject_post.service.PostService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,65 +25,25 @@ public class PostController {
 
 
     @ResponseBody
-    @PostMapping("/api/posts")       //게시물 생성
-    public StatusResponseDto createPost(@RequestBody CreatePostRequestDto createPostRequestDto, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
+    @PostMapping("/api/posts") //게시물 생성
+    public StatusResponseDto createPost(@RequestBody CreatePostRequestDto createPostRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        // 토큰 검사
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
-            }
-            return postService.createPost(createPostRequestDto, claims);
-        } else {
-            return new StatusResponseDto("token이 없습니다.", 400);
-        }
-
-
+        return postService.createPost(createPostRequestDto, userDetails.getUser());
     }
 
     @ResponseBody
-    @PutMapping("/api/posts/{id}")
-    public StatusResponseDto updatePost(@PathVariable Long id, @RequestBody UpdatePostRequestDto updatePostRequestDto, HttpServletRequest request) {
+    @PutMapping("/api/posts/{id}") // 게시물 수정
+    public StatusResponseDto updatePost(@PathVariable Long id, @RequestBody UpdatePostRequestDto updatePostRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-
-        // 토큰 검사
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
-            }
-            return postService.updatePost(id, updatePostRequestDto, claims);
-        } else {
-            return new StatusResponseDto("token이 없습니다.", 400);
-        }
-
+        return postService.updatePost(id, updatePostRequestDto, userDetails.getUser());
     }
 
     @ResponseBody
-    @DeleteMapping("/api/posts/{id}")
-    public StatusResponseDto deletePost(@PathVariable Long id, HttpServletRequest request) {
+    @DeleteMapping("/api/posts/{id}") // 게시물 삭제
+    public StatusResponseDto deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
+         return postService.deletePost(id, userDetails.getUser());
 
-        // 토큰 검사
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
-            }
-             return postService.deletePost(id, claims);
-        } else {
-            return new StatusResponseDto("token이 없습니다.", 400);
-        }
     }
 
     @GetMapping("/api/posts")
