@@ -1,12 +1,16 @@
 package com.sparta.teamproject_post.jwt;
 
 import com.sparta.teamproject_post.entity.UserRoleEnum;
+import com.sparta.teamproject_post.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -25,6 +29,8 @@ public class Jwtutil {
     public static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
+
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -78,8 +84,14 @@ public class Jwtutil {
     }
 
     // 토큰에서 사용자 정보 가져오기
-    public Claims getUserInfoFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    public String getUserInfoFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    // Jwt 토큰에서 인증 정보 조회
+    public Authentication createAuthentication(String token) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserInfoFromToken(token));
+        return new UsernamePasswordAuthenticationToken(userDetails,"",userDetails.getAuthorities());
     }
 
 }
