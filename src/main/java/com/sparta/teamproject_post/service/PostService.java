@@ -1,17 +1,17 @@
 package com.sparta.teamproject_post.service;
 
-import com.sparta.teamproject_post.dto.CreatePostRequestDto;
-import com.sparta.teamproject_post.dto.PostResponseDto;
-import com.sparta.teamproject_post.dto.StatusResponseDto;
-import com.sparta.teamproject_post.dto.UpdatePostRequestDto;
+import com.sparta.teamproject_post.dto.*;
+import com.sparta.teamproject_post.entity.Comment;
 import com.sparta.teamproject_post.entity.Post;
 import com.sparta.teamproject_post.entity.User;
 import com.sparta.teamproject_post.entity.UserRoleEnum;
 import com.sparta.teamproject_post.jwt.Jwtutil;
+import com.sparta.teamproject_post.repository.CommentRepository;
 import com.sparta.teamproject_post.repository.PostRepository;
 import com.sparta.teamproject_post.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final Jwtutil jwtutil;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
 
     public StatusResponseDto createPost(CreatePostRequestDto createPostRequestDto, Claims claims) {
@@ -82,13 +83,19 @@ public class PostService {
         }
     }
 
-
+    //전체 게시판 조회
     public List<PostResponseDto> readAllPost() {
-        List<Post> posts = postRepository.findAll(); //데이터 다 꺼냄
+        List<Post> posts = postRepository.findAll(Sort.by(Sort.Direction.ASC,"CreatedAt")); //데이터 다 꺼냄
         List<PostResponseDto> postResponsDtos = new ArrayList<>();// response를 만들어줌
         for (int i = 0; i < posts.size(); i++) {
             Post post = posts.get(i);
-            PostResponseDto postResponseDto = new PostResponseDto(post.getId(), post.getTitle(), post.getPostContent(), post.getUserName(), post.getCreatedAt(), post.getModifiedAt());
+            List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
+            List<Comment> comments = commentRepository.findAllByPostId(post.getId());
+            for (Comment comment : comments) {
+                CommentResponseDto commentResponseDto = new CommentResponseDto(comment);
+                commentResponseDtos.add(commentResponseDto);
+            }
+            PostResponseDto postResponseDto = new PostResponseDto(post.getId(), post.getTitle(), post.getPostContent(), post.getUserName(), post.getCreatedAt(), post.getModifiedAt(),commentResponseDtos);
             postResponsDtos.add(postResponseDto);
         }
         return postResponsDtos;
@@ -98,8 +105,15 @@ public class PostService {
         Optional<Post> optionalPost = postRepository.findById(id);
         if (optionalPost.isPresent()) {
             Post post = optionalPost.get();
-            return new PostResponseDto(post.getId(), post.getTitle(), post.getPostContent(), post.getUserName(), post.getCreatedAt(), post.getModifiedAt());
-        }//예외처리 해주고
-        return null;//예외처리 후 제거
+            List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
+            List<Comment> comments = commentRepository.findAllByPostId(post.getId());
+            for (Comment comment : comments) {
+                CommentResponseDto commentResponseDto = new CommentResponseDto(comment);
+                commentResponseDtos.add(commentResponseDto);
+            }
+            return new PostResponseDto(post.getId(), post.getTitle(), post.getPostContent(), post.getUserName(), post.getCreatedAt(), post.getModifiedAt(),commentResponseDtos);
+        }else {
+            throw new IllegalArgumentException("게시글을 찾을 수 없습니다.");
+        }
     }
 }
