@@ -1,6 +1,5 @@
 package com.sparta.teamproject_post.entity;
 
-import com.sparta.teamproject_post.dto.CommentRequestdto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

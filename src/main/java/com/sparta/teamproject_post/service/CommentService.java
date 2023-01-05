@@ -1,7 +1,8 @@
 package com.sparta.teamproject_post.service;
 
-import com.sparta.teamproject_post.dto.CommentRequestdto;
-import com.sparta.teamproject_post.dto.CommentResponseDto;
+import com.sparta.teamproject_post.dto.CommentRequestDto;
+;
+import com.sparta.teamproject_post.dto.StatusResponseDto;
 import com.sparta.teamproject_post.entity.Comment;
 import com.sparta.teamproject_post.entity.Post;
 import com.sparta.teamproject_post.entity.User;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -24,58 +27,77 @@ public class CommentService {
 
     @Transactional
     // 댓글 작성
-    public CommentResponseDto createComment(Long id, CommentRequestdto requestdto, Claims claims) {
+    public StatusResponseDto createComment(Long id, CommentRequestDto requestdto, Claims claims) {
         // 먼저 Long id를 이용해서 id가 있는지 확인합니다.
-        Post post = postRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
-        );
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (!optionalPost.isPresent()){
+            return new StatusResponseDto("게시글을 찾을 수 없습니다.", 400);
+        }
 
         // 그다음 토큰이 유효한지 확인합니다.
-        User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                () -> new IllegalArgumentException("타인의 댓글에 작성 할 수 없습니다.")
-        );
+        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+        if (!optionalUser.isPresent()){
+            return new StatusResponseDto("사용자를 찾을 수 없습니다.",400);
+        }
+        Post post = optionalPost.get();
+        User user = optionalUser.get();
 
 
         // 둘 다 있으면 comment에 값을 담아주고 Repository에 save 함수를 이용해서 comment 를 넣어줍니다.
         // 그 후 ReponseDto에 comment를 넣어주고 리턴시킵니다.
         Comment comment = new Comment(user, requestdto.getComment(), post);
         commentRepository.save(comment);
-        return new CommentResponseDto(comment);
+        return new StatusResponseDto("댓글을 작성했습니다.",200);
     }
 
     // 댓글 수정 기능
     @Transactional
-    public CommentResponseDto updateComment(Long id, CommentRequestdto requestdto, Claims claims) {
-        Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("id가 올바르지 않습니다.")
-        );
-        // user가 맞는지 확인합니다. claims 사용
-        User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                () -> new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
-        );
+    public StatusResponseDto updateComment(Long id, CommentRequestDto requestdto, Claims claims) {
 
-        // USER가 회원이면 작성한 게시글/댓글 수정 가능 / 어드민은 모든 게시글/댓글 수정 가능 (미구현)
+        Optional<Comment> optionalComment = commentRepository.findById(id);
+        if (!optionalComment.isPresent()){
+            return new StatusResponseDto("댓글을 찾을 수 없습니다.", 400);
+        }
+        // user가 맞는지 확인합니다. claims 사용
+        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+        if (!optionalUser.isPresent()){
+            return new StatusResponseDto("사용자를 찾을 수 없습니다.",400);
+        }
+        Comment comment = optionalComment.get();
+        User user = optionalUser.get();
+
+        // USER가 회원이면 작성한 게시글/댓글 수정 가능 / 어드민은 모든 댓글 수정 가능
         if (user.getUsername().equals(comment.getUsername()) || user.getRole().equals(UserRoleEnum.ADMIN)) {
             comment.update(requestdto.getComment());
+            return new StatusResponseDto("댓글을 수정했습니다.",200);
+        }else {
+            return new StatusResponseDto("권한이 없습니다.",401);
         }
-        return new CommentResponseDto(comment);
 
     }
 
     // 댓글 삭제 기능
-    public void deleteComment(Long id, Claims claims) {
-        Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("id가 올바르지 않습니다.")
-        );
+    public StatusResponseDto deleteComment(Long id, Claims claims) {
 
-        // user가 맞는지 확인합니다. claims 사용
-        User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                () -> new IllegalArgumentException("타인의 댓글은 수정 할 수 없습니다.")
-        );
 
+        Optional<Comment> optionalComment = commentRepository.findById(id);
+        if (!optionalComment.isPresent()){
+            return new StatusResponseDto("댓글을 찾을 수 없습니다.",400);
+        }
+
+
+        Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+        if (!optionalComment.isPresent()){
+            return new StatusResponseDto("사용자를 찾을 수 없습니다.",400);
+        }
+        Comment comment = optionalComment.get();
+        User user = optionalUser.get();
         // USER가 회원이면 작성한 게시글/댓글 삭제 가능 / 어드민은 모든 게시글/댓글 삭제 가능 (미구현)
         if (user.getUsername().equals(comment.getUsername()) || user.getRole().equals(UserRoleEnum.ADMIN)) {
-            commentRepository.deleteById(id);
+            commentRepository.delete(comment);
+            return new StatusResponseDto("댓글을 삭제했습니다.",200);
+        }else {
+            return new StatusResponseDto("권한이 없습니다.",401);
         }
     }
 }

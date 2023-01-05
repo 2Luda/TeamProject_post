@@ -1,8 +1,9 @@
 package com.sparta.teamproject_post.controller;
 
 import com.sparta.teamproject_post.dto.CreatePostRequestDto;
-import com.sparta.teamproject_post.dto.PostResponse;
-import com.sparta.teamproject_post.dto.UpdatePostRequest;
+import com.sparta.teamproject_post.dto.PostResponseDto;
+import com.sparta.teamproject_post.dto.StatusResponseDto;
+import com.sparta.teamproject_post.dto.UpdatePostRequestDto;
 import com.sparta.teamproject_post.jwt.Jwtutil;
 import com.sparta.teamproject_post.repository.PostRepository;
 import com.sparta.teamproject_post.service.PostService;
@@ -21,8 +22,9 @@ public class PostController {
     private final PostService postService;
 
 
+    @ResponseBody
     @PostMapping("/api/posts")       //게시물 생성
-    public void createPost(@RequestBody CreatePostRequestDto createPostRequestDto, HttpServletRequest request) {
+    public StatusResponseDto createPost(@RequestBody CreatePostRequestDto createPostRequestDto, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
@@ -31,18 +33,19 @@ public class PostController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
             }
-            postService.createPost(createPostRequestDto, claims);
+            return postService.createPost(createPostRequestDto, claims);
         } else {
-            throw new IllegalArgumentException("작성 실패");
+            return new StatusResponseDto("token이 없습니다.", 400);
         }
 
 
     }
 
+    @ResponseBody
     @PutMapping("/api/posts/{id}")
-    public void updatePost(@PathVariable Long id, UpdatePostRequest updatePostRequest, HttpServletRequest request) {
+    public StatusResponseDto updatePost(@PathVariable Long id, @RequestBody UpdatePostRequestDto updatePostRequestDto, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -52,17 +55,18 @@ public class PostController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
             }
-            postService.updatePost(id, updatePostRequest, claims);
+            return postService.updatePost(id, updatePostRequestDto, claims);
         } else {
-            throw new IllegalArgumentException("작성 실패");
+            return new StatusResponseDto("token이 없습니다.", 400);
         }
 
     }
 
+    @ResponseBody
     @DeleteMapping("/api/posts/{id}")
-    public void deletePost(@PathVariable Long id, HttpServletRequest request) {
+    public StatusResponseDto deletePost(@PathVariable Long id, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -72,23 +76,23 @@ public class PostController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 올바르지 않습니다.", 400);
             }
-            postService.deletePost(id, claims);
+             return postService.deletePost(id, claims);
         } else {
-            throw new IllegalArgumentException("작성 실패");
+            return new StatusResponseDto("token이 없습니다.", 400);
         }
     }
 
     @GetMapping("/api/posts")
     @ResponseBody
-    public List<PostResponse> readAllPost() {
+    public List<PostResponseDto> readAllPost() {
         return postService.readAllPost();
     }
 
     @GetMapping("/api/posts/{id}")
     @ResponseBody
-    public PostResponse readPost(@PathVariable Long id) {
+    public PostResponseDto readPost(@PathVariable Long id) {
         return postService.readPost(id);
     }
 

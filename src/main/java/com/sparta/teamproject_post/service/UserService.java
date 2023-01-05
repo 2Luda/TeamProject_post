@@ -16,8 +16,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
-    private Jwtutil jwtutil;
+    private final UserRepository userRepository;
+    private final Jwtutil jwtutil;
 
     public StatusResponseDto signup(SignupRequestDto signupRequestDto, UserRoleEnum role) {
         Optional<User> byUsername = userRepository.findByUsername(signupRequestDto.getUsername());

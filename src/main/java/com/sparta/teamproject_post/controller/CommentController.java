@@ -1,6 +1,6 @@
 package com.sparta.teamproject_post.controller;
-import com.sparta.teamproject_post.dto.CommentRequestdto;
-import com.sparta.teamproject_post.dto.CommentResponseDto;
+import com.sparta.teamproject_post.dto.CommentRequestDto;
+import com.sparta.teamproject_post.dto.StatusResponseDto;
 import com.sparta.teamproject_post.jwt.Jwtutil;
 import com.sparta.teamproject_post.service.CommentService;
 import io.jsonwebtoken.Claims;
@@ -20,8 +20,8 @@ public class CommentController {
     private final Jwtutil jwtUtil;
 
     // 댓글 작성
-    @PostMapping("/api/post/{id}/comment")
-    public CommentResponseDto createComment(@PathVariable Long id, @RequestBody CommentRequestdto requestdto, HttpServletRequest request) {
+    @PostMapping("/api/posts/{id}/comments")
+    public StatusResponseDto createComment(@PathVariable Long id, @RequestBody CommentRequestDto requestdto, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
@@ -30,17 +30,17 @@ public class CommentController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 유효하지 않습니다.",400);
             }
             return commentService.createComment(id,requestdto,claims);
         } else {
-            throw new IllegalArgumentException("작성 실패");
+            return new StatusResponseDto("token이 없습니다.",400);
         }
     }
 
     // 댓글 수정
-    @PutMapping("/api/post/{id}/comment")
-    public CommentResponseDto updateComment(@PathVariable Long id, @RequestBody CommentRequestdto requestdto, HttpServletRequest request) {
+    @PutMapping("/api/comments/{id}")
+    public StatusResponseDto updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestdto, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
@@ -49,17 +49,18 @@ public class CommentController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 유효하지 않습니다.",400);
             }
             return commentService.updateComment(id,requestdto,claims);
         } else {
-            throw new IllegalArgumentException("조회 실패");
+            return new StatusResponseDto("token이 없습니다.",400);
         }
     }
 
     // 댓글 삭제
-    @DeleteMapping("/api/post/{id}/comment")
-    public void deleteComment(@PathVariable Long id, HttpServletRequest request) {
+    @ResponseBody
+    @DeleteMapping("/api/comments/{id}")
+    public StatusResponseDto deleteComment(@PathVariable Long id, HttpServletRequest request) {
 
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -69,9 +70,12 @@ public class CommentController {
             if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                return new StatusResponseDto("token이 유효하지 않습니다.",400);
             }
-            commentService.deleteComment(id,claims);
+
+            return commentService.deleteComment(id,claims);
+        }else {
+            return new StatusResponseDto("token이 없습니다.",400);
         }
     }
 

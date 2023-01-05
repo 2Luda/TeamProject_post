@@ -13,7 +13,7 @@ public class Post extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     //long id = 0L;  //객체를 생성할때 id에 0을 넣고 시작
-    private long id;
+    private Long id;
     @Column(nullable = false)
     private String title;
     @Column(nullable = false)
