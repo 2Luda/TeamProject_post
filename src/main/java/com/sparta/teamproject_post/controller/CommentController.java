@@ -1,22 +1,23 @@
 package com.sparta.teamproject_post.controller;
 import com.sparta.teamproject_post.dto.CommentRequestdto;
 import com.sparta.teamproject_post.dto.CommentResponseDto;
-import com.sparta.teamproject_post.jwt.JwtUtil;
+import com.sparta.teamproject_post.jwt.Jwtutil;
 import com.sparta.teamproject_post.service.CommentService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.NoArgsConstructor;
+
+import javax.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @RestController
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
-    private final JwtUtil jwtUtil;
+    private final Jwtutil jwtUtil;
 
     // 댓글 작성
     @PostMapping("/api/post/{id}/comment")
@@ -26,7 +27,7 @@ public class CommentController {
 
         // 토큰 검사
         if (token != null) {
-            if (jwtUtil.vaildateToken(token)) {
+            if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
                 throw new IllegalArgumentException("Token Error");
@@ -45,7 +46,7 @@ public class CommentController {
 
         // 토큰 검사
         if (token != null) {
-            if (jwtUtil.vaildateToken(token)) {
+            if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
                 throw new IllegalArgumentException("Token Error");
@@ -65,7 +66,7 @@ public class CommentController {
 
         // 토큰 검사
         if (token != null) {
-            if (jwtUtil.vaildateToken(token)) {
+            if (jwtUtil.validateToken(token)) {
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
                 throw new IllegalArgumentException("Token Error");

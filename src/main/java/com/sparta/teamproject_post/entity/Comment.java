@@ -26,13 +26,13 @@ public class Comment extends TimeStamped{
     @JoinColumn(name = "postId")
     private Post post;
 
-    public Comment(User user, CommentRequestdto requestdto, Post post) {
-        this.comment = requestdto.getComment();
+    public Comment(User user, String comment, Post post) {
+        this.comment = comment;
         this.username = user.getUsername();
         this.post = post;
     }
 
-    public void update(CommentRequestdto requestdto) {
-        this.comment = requestdto.getComment();
+    public void update(String comment) {
+        this.comment = comment;
     }
 }

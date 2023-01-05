@@ -5,6 +5,7 @@ import com.sparta.teamproject_post.dto.CommentResponseDto;
 import com.sparta.teamproject_post.entity.Comment;
 import com.sparta.teamproject_post.entity.Post;
 import com.sparta.teamproject_post.entity.User;
+import com.sparta.teamproject_post.entity.UserRoleEnum;
 import com.sparta.teamproject_post.repository.CommentRepository;
 import com.sparta.teamproject_post.repository.PostRepository;
 import com.sparta.teamproject_post.repository.UserRepository;
@@ -37,7 +38,7 @@ public class CommentService {
 
         // 둘 다 있으면 comment에 값을 담아주고 Repository에 save 함수를 이용해서 comment 를 넣어줍니다.
         // 그 후 ReponseDto에 comment를 넣어주고 리턴시킵니다.
-        Comment comment = new Comment(user, requestdto, post);
+        Comment comment = new Comment(user, requestdto.getComment(), post);
         commentRepository.save(comment);
         return new CommentResponseDto(comment);
     }
@@ -54,9 +55,11 @@ public class CommentService {
         );
 
         // USER가 회원이면 작성한 게시글/댓글 수정 가능 / 어드민은 모든 게시글/댓글 수정 가능 (미구현)
-
-        comment.update(requestdto);
+        if (user.getUsername().equals(comment.getUsername()) || user.getRole().equals(UserRoleEnum.ADMIN)) {
+            comment.update(requestdto.getComment());
+        }
         return new CommentResponseDto(comment);
+
     }
 
     // 댓글 삭제 기능
@@ -71,7 +74,8 @@ public class CommentService {
         );
 
         // USER가 회원이면 작성한 게시글/댓글 삭제 가능 / 어드민은 모든 게시글/댓글 삭제 가능 (미구현)
-
-        commentRepository.deleteById(id);
+        if (user.getUsername().equals(comment.getUsername()) || user.getRole().equals(UserRoleEnum.ADMIN)) {
+            commentRepository.deleteById(id);
+        }
     }
 }

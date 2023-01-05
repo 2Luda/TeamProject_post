@@ -15,6 +15,7 @@ public class SignupRequestDto {
     @Pattern(regexp = "^[0-9a-zA-Z]*$")
     private String password;
 
-    private boolean admin;
+    private boolean admin = false;
+    private String adminPassword = "";
 
 }

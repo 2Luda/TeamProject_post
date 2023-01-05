@@ -1,12 +1,13 @@
 package com.sparta.teamproject_post.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-//@NoArgsConstructor
+@NoArgsConstructor
 public class Post extends TimeStamped {
 
     @Id
@@ -31,5 +32,7 @@ public class Post extends TimeStamped {
         this.title = title;
         this.postContent = postContent;
     }
+
+    //페이지 삭제시 좋아요 같이 삭제
 
 }

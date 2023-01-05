@@ -3,8 +3,7 @@ package com.sparta.teamproject_post.dto;
 import lombok.Getter;
 
 @Getter
-public class CreatePostRequest {
+public class CreatePostRequestDto {
     private String title;
-    private String userName;
     private String postContent;
 }
